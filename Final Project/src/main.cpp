@@ -5,6 +5,7 @@
 #define WATER_CUTOFF 100
 
 // Globals---------------------------------------------
+bool isDisabled = false;
 
 // Function Protoypes----------------------------------
 unsigned char getWaterLevel();
@@ -15,8 +16,6 @@ void setup() {
 }
 
 void loop() {
-  Serial.println(getWaterLevel());
-  delay(500);
 }
 
 // Additional Functions--------------------------------
