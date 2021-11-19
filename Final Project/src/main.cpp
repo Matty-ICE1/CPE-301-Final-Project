@@ -2,37 +2,24 @@
 #include <Servo.h>
 #include <Wire.h>
 #include <LiquidCrystal.h>
+#include <dht_nonblocking.h>
 #include "readAnalog.h"
+#include "readDigital.h"
 
-//PORT B LED Configuration
-#define RED 7
-#define BLUE 6
-#define GREEN 5
-#define YELLOW 4
+#include "config.h"
 
-//Water Sensor Configuration
-#define WATER_PIN 0  // A0
-#define WATER_CUTOFF 100
+//Globals-----------------------------------------------
+enum State {idle, running, disabled, error};
+State swampCooler;
 
-//Servo Motor Configuration
-#define SERVO_PIN 6
-#define SERVO_KNOB 1  // A1
+float temperature, humidity;
+unsigned char waterLevel, controlPot;
+bool isDisabled;
 
-// Temperature Configuration
-#define TEMP_THRESHOLD 25 // *C
-
-#define RS 22
-#define EN 23
-#define D4 24
-#define D5 25
-#define D6 26
-#define D7 27
-
-// Globals---------------------------------------------
-bool isDisabled = false;
-char status;
+// Hardware---------------------------------------------
 Servo vent;
 LiquidCrystal lcd(RS, EN, D4, D5, D6, D7); // rs, enable, d4, d5, d6, d7
+DHT_nonblocking dht_sensor( DHT_PIN, DHT_SENSOR_TYPE );
 
 // Function Protoypes----------------------------------
 unsigned char getWaterLevel();
@@ -45,6 +32,8 @@ float getTemperature();
 void setup() {
   //Output pins
   DDRB |= 0b00001111; // PB 4,5,6,7
+  DDRL &= 0b11111110; // PL0 is input
+  PORTL |= 0b00000001; // enable pullup resistor
 
   //ADC
   startADC();  // start the ADC
@@ -55,27 +44,44 @@ void setup() {
   //LCD Setup
   lcd.begin(16, 2); // cols rows
   lcd.clear();
+
+  //Debug
+  Serial.begin(9600);
 }
 
 void loop() {
-  if(!isDisabled) {
-    if (getWaterLevel() < 0) status = 'E';  // Disabled
-    else status = 'I'; // Idle
+  waterLevel = analogRead(WATER_PIN);
 
-    if (getTemperature() > TEMP_THRESHOLD) status = 'R';
-    else status = 'I';
-  }
-  else {
-    //yellow LED
+  // state setting
+  if (isDisabled) swampCooler = disabled;
+  else if (waterLevel < WATER_CUTOFF) swampCooler = error;
+  else if (temperature < TEMP_THRESHOLD) swampCooler = idle;
+  else swampCooler = running;
+
+  switch (swampCooler)
+  {
+  case disabled:
+    digitalWriteLED('y', 1);
+    break;
+
+  case error:
+    digitalWriteLED('r', 1);
+    break;
+
+  case idle:
+    digitalWriteLED('b', 1);
+    break;
+
+  case running:
+    digitalWriteLED('g', 1);
+    break;
+  
+  default:
+    break;
   }
 }
 
 // Additional Functions--------------------------------
-unsigned char getWaterLevel() {
-  unsigned int reading = readAnalog(WATER_PIN);
-  if (reading < WATER_CUTOFF) return 0;
-  return (unsigned char) map(reading, WATER_CUTOFF, 896, 1, 100);
-}
 
 void runLCD(unsigned char s) {
 }
