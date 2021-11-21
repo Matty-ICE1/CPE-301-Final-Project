@@ -5,6 +5,7 @@
 #include <dht_nonblocking.h>
 #include "readAnalog.h"
 #include "readDigital.h"
+#include "globalTimer.h"
 
 #include "config.h"
 
