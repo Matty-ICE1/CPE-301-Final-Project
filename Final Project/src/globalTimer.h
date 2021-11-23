@@ -1,7 +1,8 @@
 #ifndef GLOBAL_TIMER_H
 #define GLOBAL_TIMER_H
 
-    unsigned long Millis = 0;
+    unsigned int sensorDisplayTimer = 0;
+    unsigned int buttonRefreshTimer = 0;
 
     void startGlobalTimer();
     void globalTimerRun();
@@ -12,7 +13,7 @@
         TCCR1B |= 0b11111000;
 
         //Compare out to reset on 16,000
-        OCR1AH = 0x3E;
+        OCR1A = 0x3E;
         OCR1AL = 0x80;
 
         // Zero timer
@@ -20,13 +21,16 @@
         TIFR1 |= 0b10;  // clear outputs
 
         // Start
-        TCCR1B |= 0b1; 
+        TCCR1B |=1;
 
     }
 
     void globalTimerRun() {
         // if match on OCR1A
-        if ((TIFR1 & 0b10) == 0b10) Millis++;  // increment
+        if ((TIFR1 & 0b10) == 0b10) {
+            sensorDisplayTimer++;
+            buttonRefreshTimer++;
+        }
         TIFR1 |= 0b10;  // reset flag
     }
 

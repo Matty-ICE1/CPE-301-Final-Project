@@ -1,6 +1,10 @@
 #ifndef CONFIG_H
 #define CONFIG_H
 
+    // Main status check
+    #define BUTTON_UPDATE_INT 100
+    #define SENSOR_UPDATE_INT 5000
+
     //Water Sensor Configuration
     #define WATER_PIN 0  // A0
     #define WATER_CUTOFF 100
@@ -11,7 +15,7 @@
 
     // Temperature Configuration
     #define DHT_PIN 2
-    #define TEMP_THRESHOLD 25 // *C
+    #define TEMP_THRESHOLD 20 // *C
     #define DHT_SENSOR_TYPE DHT_TYPE_11
 
     //LCD Pins on MEGA
