@@ -26,8 +26,7 @@ DHT_nonblocking dht_sensor( DHT_PIN, DHT_SENSOR_TYPE );
 
 // Function Protoypes----------------------------------
 unsigned char getWaterLevel();
-void runLCD(unsigned char);
-void digitalWriteLED(unsigned char, bool);
+void digitalWriteLED(State, bool);
 void updateState();
 
 
@@ -61,6 +60,10 @@ void setup() {
 
 void loop() {
 
+  // Secondary Polling Block---------------------------
+  // This function runs every BUTTON_UPD... interval
+  // configured in 'config.h'
+  // nothing else really should go here
   if (buttonRefreshTimer > BUTTON_UPDATE_INT) {
     if (risingReadPortL(0)) {
       if (isDisabled) isDisabled = false;
@@ -70,6 +73,9 @@ void loop() {
     buttonRefreshTimer = 0;
   }
 
+  // Primary Polling Block----------------------------
+  // Runs every five seconds. NO SOONER OR GLITCHIES
+  // configured in 'config.h'
   if (sensorDisplayTimer > SENSOR_UPDATE_INT) {
     waterLevel = analogRead(WATER_PIN);
     //Temperature and humidity
@@ -81,24 +87,22 @@ void loop() {
 
 // Additional Functions--------------------------------
 
-void runLCD(unsigned char s) {
-}
-
-void digitalWriteLED(unsigned char l, bool state) {
-    switch(l) {
-        case 'r':  // MEGA pin 50
+void digitalWriteLED(State c, bool state) {
+    unsigned char l;
+    switch(c) {
+        case error:  // MEGA pin 50
             l = 0b00001000;
             break;
 
-        case 'y':  // MEGA pin 51
+        case disabled:  // MEGA pin 51
             l = 0b00000100;
             break;
 
-        case 'g':  // MEGA pin 52
+        case running:  // MEGA pin 52
             l = 0b00000010;
             break;
 
-        case 'b':  // MEGA pin 53
+        case idle:  // MEGA pin 53
             l = 0b00000001;
             break;
 
@@ -117,25 +121,23 @@ void updateState() {
   else if (temperature < TEMP_THRESHOLD) swampCooler = idle;
   else swampCooler = running;
 
+  digitalWriteLED(swampCooler, 1);
+
   switch (swampCooler)
     {
     case disabled:
-      digitalWriteLED('y', 1);
       setMotorSpeed(0);
       break;
 
     case error:
-      digitalWriteLED('r', 1);
       setMotorSpeed(0);
       break;
 
     case idle:
-      digitalWriteLED('b', 1);
       setMotorSpeed(0);
       break;
 
     case running:
-      digitalWriteLED('g', 1);
       setMotorSpeed(100);
       break;
     
