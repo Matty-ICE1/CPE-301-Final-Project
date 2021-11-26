@@ -26,8 +26,8 @@ DHT_nonblocking dht_sensor( DHT_PIN, DHT_SENSOR_TYPE );
 
 // Function Protoypes----------------------------------
 unsigned char getWaterLevel();
-void digitalWriteLED(State, bool);
 void updateState();
+bool measure_environment( float *temperature, float *humidity );
 
 
 //MAIN=================================================
@@ -56,6 +56,8 @@ void setup() {
 
   //Debug
   Serial.begin(9600);
+
+  updateState();
 }
 
 void loop() {
@@ -78,41 +80,18 @@ void loop() {
   // configured in 'config.h'
   if (sensorDisplayTimer > SENSOR_UPDATE_INT) {
     waterLevel = analogRead(WATER_PIN);
-    //Temperature and humidity
+    Serial.print(temperature); Serial.print(" "); Serial.println(humidity);
+    updateState();
     sensorDisplayTimer = 0;
   }
 
+  // Based on testing, this sensor only works if polled continuously. 
+
+  if (!isDisabled) dht_sensor.measure(&temperature, &humidity);
   globalTimerRun();  // update the global timer
 }
 
 // Additional Functions--------------------------------
-
-void digitalWriteLED(State c, bool state) {
-    unsigned char l;
-    switch(c) {
-        case error:  // MEGA pin 50
-            l = 0b00001000;
-            break;
-
-        case disabled:  // MEGA pin 51
-            l = 0b00000100;
-            break;
-
-        case running:  // MEGA pin 52
-            l = 0b00000010;
-            break;
-
-        case idle:  // MEGA pin 53
-            l = 0b00000001;
-            break;
-
-        default:
-            break;
-    }
-
-    if (state) PORTB = l;
-    else PORTB = ~l;
-}
 
 void updateState() {
 
@@ -121,27 +100,34 @@ void updateState() {
   else if (temperature < TEMP_THRESHOLD) swampCooler = idle;
   else swampCooler = running;
 
-  digitalWriteLED(swampCooler, 1);
+  unsigned char l;
 
   switch (swampCooler)
     {
     case disabled:
+      l = 0b00000001;
       setMotorSpeed(0);
       break;
 
     case error:
+      l = 0b00000010;
       setMotorSpeed(0);
       break;
 
     case idle:
+      l = 0b00000100;
       setMotorSpeed(0);
       break;
 
     case running:
+      l = 0b00001000;
       setMotorSpeed(100);
       break;
     
     default:
       break;
     }
+
+    PORTB = l;
 }
+

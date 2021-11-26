@@ -14,8 +14,8 @@
     #define SERVO_KNOB 1  // A1
 
     // Temperature Configuration
-    #define DHT_PIN 2
-    #define TEMP_THRESHOLD 20 // *C
+    #define DHT_PIN 28
+    #define TEMP_THRESHOLD 27 // *C
     #define DHT_SENSOR_TYPE DHT_TYPE_11
 
     //LCD Pins on MEGA
