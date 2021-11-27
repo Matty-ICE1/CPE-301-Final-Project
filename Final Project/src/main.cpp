@@ -46,6 +46,7 @@ void setup() {
 
   //LCD Setup
   lcd.begin(16, 2); // cols rows
+  lcd.noAutoscroll();
   lcd.clear();
 
   // Motor
@@ -56,6 +57,9 @@ void setup() {
 
   //Debug
   Serial.begin(9600);
+
+  waterLevel = analogRead(WATER_PIN);
+  dht_sensor.measure(&temperature, &humidity);
 
   updateState();
 }
@@ -86,7 +90,6 @@ void loop() {
   }
 
   // Based on testing, this sensor only works if polled continuously. 
-
   if (!isDisabled) dht_sensor.measure(&temperature, &humidity);
   globalTimerRun();  // update the global timer
 }
@@ -101,27 +104,41 @@ void updateState() {
   else swampCooler = running;
 
   unsigned char l;
+  lcd.flush();
+  lcd.clear();
+  lcd.setCursor(9, 0);
+  lcd.print(temperature); lcd.print("'C");
+  lcd.setCursor(9, 1);
+  lcd.print(humidity); lcd.print("%");
+  lcd.setCursor(0,0);  // prime for display
 
   switch (swampCooler)
     {
     case disabled:
       l = 0b00000001;
       setMotorSpeed(0);
+      lcd.clear();
+      lcd.print("Disabled");
       break;
 
     case error:
       l = 0b00000010;
       setMotorSpeed(0);
+      lcd.print("Error");
+      lcd.setCursor(0, 1);
+      lcd.print("Refill");
       break;
 
     case idle:
       l = 0b00000100;
       setMotorSpeed(0);
+      lcd.print("Idle");
       break;
 
     case running:
       l = 0b00001000;
       setMotorSpeed(100);
+      lcd.print("Running");
       break;
     
     default:

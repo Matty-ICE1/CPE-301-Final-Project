@@ -3,7 +3,7 @@
 
     // Main status check
     #define BUTTON_UPDATE_INT 100
-    #define SENSOR_UPDATE_INT 5000
+    #define SENSOR_UPDATE_INT 1000
 
     //Water Sensor Configuration
     #define WATER_PIN 0  // A0
