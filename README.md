@@ -12,4 +12,4 @@ The goal of this project is to create a Swamp Cooler which conforms to the speci
 A video demonstration of the final product can be found at: https://youtu.be/Qmy-I7V6E_Q
 
 ## TinkerCAD Model:
-A schematic of the system can be found at:___. NOTE: TinkerCAD does not contain the Arduino MEGA or a water sensor in its component library. As a substitute, two Arduino unos were used, and their pins remapped accordingly. 
+A schematic of the system can be found at:https://www.tinkercad.com/things/6ZNl8fJ89GK. NOTE: TinkerCAD does not contain the Arduino MEGA or a water sensor in its component library. As a substitute, two Arduino unos were used, and their pins remapped accordingly, and two temperature sensors were used, one acting as a water sensor.
